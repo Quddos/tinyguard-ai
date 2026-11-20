@@ -1,0 +1,14 @@
+# Streamlit chrome. Colours are deliberately NOT pinned here.
+#
+# The chart palette in dashboard/lib/theme.py has separately validated light and
+# dark steps, and dashboard/lib/theme.py:active_palette() picks between them from
+# the viewer's active theme. Pinning a theme here would force one palette and
+# make the other unreachable, so Streamlit's own light/dark surfaces are used
+# and the palette was validated against exactly those two surfaces
+# (#ffffff and #0e1117).
+
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
