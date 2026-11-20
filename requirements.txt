@@ -1,0 +1,25 @@
+# TinyGuard-AI — Python dependencies
+#
+# Pinned to the exact versions that produced the committed research artifacts
+# (ml/models/*.pkl, firmware/model_*_params.h, results/*.json).
+#
+# Install:  python -m pip install -r requirements.txt
+#
+# IMPORTANT (reproducibility): the committed .pkl artifacts were serialised by
+# scikit-learn 1.9.1. Loading them under a different scikit-learn version raises
+# InconsistentVersionWarning and is not guaranteed to reproduce the committed
+# INT8 headers. Use the pin below, or regenerate the artifacts end to end with
+# `make -C ml all` after changing it.
+
+# ---- Core ML / numerics pipeline ----
+scikit-learn==1.9.1
+numpy==2.5.1
+pandas==3.0.5
+joblib==1.5.3
+
+# ---- Visualisation dashboard ----
+streamlit==1.67.0
+plotly==6.9.0
+
+# ---- Testing ----
+pytest==9.1.1

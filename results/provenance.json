@@ -1,0 +1,28 @@
+{
+  "generated_utc": "2026-11-20T04:40:12+00:00",
+  "generator": "ml/run_evaluation.py",
+  "git_commit": "5a37d355f817f29a4705b85803327d4527f91b58",
+  "limitations": [
+    "The vibration dataset is SYNTHETIC. No physical accelerometer, motor or machine was measured at any point.",
+    "ARM Cortex-M4 execution is QEMU emulation (machine mps2-an386). No physical microcontroller was programmed, run or timed.",
+    "Reported accuracy reflects the separability of the synthetic generator, not demonstrated model capability. Simpler baselines reach the same score.",
+    "No wall-clock inference latency or energy figure is included, because neither can be obtained from emulation without a calibrated cycle model."
+  ],
+  "environment": {
+    "python": "3.14.6",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.5.1",
+    "pandas": "3.0.5",
+    "scikit_learn": "1.9.0",
+    "joblib": "1.5.3"
+  },
+  "artifact_hashes": {
+    "dataset": "6056012dd30aea12cd8f6460fe40676a00df8ad6fb8e4a9a45f32c420b44a98d",
+    "model_pkl": "4b185c893c836458d9fa3e0ee7dc51b470651cc7c59933387fef98b6e5d1ab5f",
+    "scaler_pkl": "33ef198a27b8994ce81cc40bcf78d32cc44058903168bbf73d8f074c1a9c498c",
+    "int8_header": "4ab34a80f68bfdbf7e14fd95031347144b2bd7dff24497a0e5be5561cb52971b",
+    "fp32_header": "7cdb5c699600618e30109a46e7f88e67bab8e9ed27a05a89ae97ca5f8eec57c7"
+  },
+  "model_trained_with_sklearn": "1.9.1",
+  "sklearn_version_matches_training": false
+}

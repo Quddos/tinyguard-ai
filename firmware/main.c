@@ -63,10 +63,21 @@ static void monitor_motor(SensorScenario scenario)
 
     print("\n--------------------------------\n");
 
-    if (scenario == SENSOR_NORMAL) {
-        print("MOTOR: HEALTHY TEST SCENARIO\n");
-    } else {
-        print("MOTOR: ABNORMAL TEST SCENARIO\n");
+    switch (scenario) {
+    case SENSOR_NORMAL:
+        print("MOTOR: HEALTHY SCENARIO (in-distribution)\n");
+        break;
+
+    case SENSOR_ABNORMAL_TYPICAL:
+        print("MOTOR: ABNORMAL SCENARIO (in-distribution)\n");
+        break;
+
+    case SENSOR_ABNORMAL:
+    default:
+        print("MOTOR: ABNORMAL SCENARIO (SEVERE, out-of-distribution)\n");
+        print("  NOTE: features exceed the trained range, so the INT8\n");
+        print("  input quantizer saturates and the logit is compressed.\n");
+        break;
     }
 
     print("[FEATURE] Mean absolute: ");
@@ -128,6 +139,7 @@ int main(void)
     print("\n================================\n");
     print("TINYGUARD-AI SENSOR MONITOR\n");
     print("ARM CORTEX-M4 + TINYML\n");
+    print("SYNTHETIC DATA / QEMU EMULATION\n");
     print("================================\n");
 
     print("[BOOT] Firmware initialized\n");
@@ -135,6 +147,7 @@ int main(void)
     print("[AI] FP32 and INT8 models loaded\n");
 
     monitor_motor(SENSOR_NORMAL);
+    monitor_motor(SENSOR_ABNORMAL_TYPICAL);
     monitor_motor(SENSOR_ABNORMAL);
 
     print("\n[COMPLETE] AI sensor analysis finished\n");

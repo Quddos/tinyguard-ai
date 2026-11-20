@@ -1,0 +1,122 @@
+{
+  "source_file": "ml/data/tinyguard_vibration_dataset.csv",
+  "sha256": "6056012dd30aea12cd8f6460fe40676a00df8ad6fb8e4a9a45f32c420b44a98d",
+  "data_origin": "synthetic",
+  "physical_sensor_used": false,
+  "total_windows": 3000,
+  "samples_per_window": 16,
+  "feature_names": [
+    "mean_absolute",
+    "rms",
+    "peak"
+  ],
+  "class_distribution": {
+    "1": 1500,
+    "0": 1500
+  },
+  "scenario_distribution": {
+    "healthy": 1500,
+    "high_amplitude": 510,
+    "mixed_frequency": 509,
+    "impulsive": 481
+  },
+  "per_class": {
+    "0": {
+      "name": "healthy",
+      "windows": 1500,
+      "features": {
+        "mean_absolute": {
+          "min": 2.0,
+          "p25": 5.0,
+          "median": 7.0,
+          "p75": 9.0,
+          "max": 13.0,
+          "mean": 7.042,
+          "std": 2.4240948826314535
+        },
+        "rms": {
+          "min": 3.0,
+          "p25": 6.0,
+          "median": 8.0,
+          "p75": 10.0,
+          "max": 15.0,
+          "mean": 8.0,
+          "std": 2.6237377917772196
+        },
+        "peak": {
+          "min": 6.0,
+          "p25": 11.0,
+          "median": 14.0,
+          "p75": 17.0,
+          "max": 25.0,
+          "mean": 14.228,
+          "std": 3.8815824951515157
+        }
+      }
+    },
+    "1": {
+      "name": "abnormal",
+      "windows": 1500,
+      "features": {
+        "mean_absolute": {
+          "min": 7.0,
+          "p25": 18.0,
+          "median": 20.0,
+          "p75": 33.0,
+          "max": 78.0,
+          "mean": 27.348666666666666,
+          "std": 16.53059078059691
+        },
+        "rms": {
+          "min": 14.0,
+          "p25": 23.0,
+          "median": 29.0,
+          "p75": 44.0,
+          "max": 87.0,
+          "mean": 35.900666666666666,
+          "std": 16.883250068896356
+        },
+        "peak": {
+          "min": 25.0,
+          "p25": 49.0,
+          "median": 70.0,
+          "p75": 103.0,
+          "max": 147.0,
+          "mean": 76.294,
+          "std": 29.52171343265834
+        }
+      }
+    }
+  },
+  "per_feature_class_overlap": {
+    "mean_absolute": {
+      "healthy_max": 13.0,
+      "abnormal_min": 7.0,
+      "overlaps": true
+    },
+    "rms": {
+      "healthy_max": 15.0,
+      "abnormal_min": 14.0,
+      "overlaps": true
+    },
+    "peak": {
+      "healthy_max": 25.0,
+      "abnormal_min": 25.0,
+      "overlaps": true
+    }
+  },
+  "separability_note": "The classes are drawn from near-disjoint amplitude regimes. Any single feature overlaps slightly between classes, but the three features jointly separate them almost perfectly, which is why every classifier tested reaches the same score.",
+  "redundancy": {
+    "unique_feature_vectors": 1364,
+    "duplicate_rows": 1636,
+    "conflicting_duplicate_vectors": 0,
+    "note": "Features are coarse integers, so many windows collapse onto the same feature vector. No feature vector carries both labels."
+  },
+  "naive_split_leakage": {
+    "split": "train_test_split(test_size=0.2, random_state=42, stratify=y)",
+    "test_rows": 600,
+    "test_rows_whose_vector_appears_in_train": 371,
+    "fraction": 0.6183333333333333,
+    "note": "Because identical feature vectors straddle the split, the naive test accuracy is not a generalisation estimate. A leakage-free grouped split is reported in model_metrics.json."
+  }
+}

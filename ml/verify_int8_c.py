@@ -7,6 +7,8 @@ import joblib
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
+from header_params import assert_matches_header
+
 # ============================================================
 # 1. LOAD MODEL, SCALER AND DATASET
 # ============================================================
@@ -84,6 +86,28 @@ acc2_scale = hidden_scale * W2_scale
 q_b2 = np.rint(
     model.intercepts_[1] / acc2_scale
 ).astype(np.int32)
+
+# ============================================================
+# 2b. GUARD: the re-derived parameters MUST equal the shipped header
+# ============================================================
+#
+# DEFECT FIX: this script used to re-derive the quantization constants from the
+# .pkl and verify those, never reading firmware/model_int8_params.h. The model
+# being verified was therefore not provably the model being compiled. Assert
+# equality first, so any exporter/header drift fails loudly here.
+
+header = assert_matches_header(
+    weights1=W1,
+    bias1=q_b1,
+    weights2=W2,
+    bias2=q_b2,
+    input_scale=input_scale,
+    acc1_scale=acc1_scale,
+    hidden_scale=hidden_scale,
+    acc2_scale=acc2_scale,
+)
+
+print("Header consistency: derived parameters match", header["path"].name)
 
 # Match C header precision
 input_scale_c = np.float32(input_scale)
@@ -221,8 +245,21 @@ input_text = "".join(
     for row in X_test
 )
 
+FIRMWARE_DIR = BASE_DIR.parent / "firmware"
+
+binary = FIRMWARE_DIR / "verify_int8_host"
+if not binary.exists():
+    binary = FIRMWARE_DIR / "verify_int8_host.exe"
+
+if not binary.exists():
+    raise SystemExit(
+        "Host verification binary not found in "
+        + str(FIRMWARE_DIR)
+        + ". Build it first:  make -C firmware hosttools"
+    )
+
 process = subprocess.run(
-    ["../firmware/verify_int8_host"],
+    [str(binary)],
     input=input_text,
     text=True,
     capture_output=True,

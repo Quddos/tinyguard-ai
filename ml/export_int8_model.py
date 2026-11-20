@@ -29,7 +29,16 @@ df = pd.read_csv(DATA_FILE)
 
 features = ["mean_absolute", "rms", "peak"]
 
+# Network dimensions, asserted against the trained model below so a retrained
+# model of a different shape fails loudly instead of emitting a wrong header.
+INPUT_UNITS = 3
+HIDDEN_UNITS = 8
+
 X = df[features].values.astype(np.float32)
+
+assert model.n_features_in_ == INPUT_UNITS, model.n_features_in_
+assert model.hidden_layer_sizes == (HIDDEN_UNITS,), model.hidden_layer_sizes
+assert len(model.coefs_) == 2, len(model.coefs_)
 
 X_train, X_test = train_test_split(
     X,
@@ -45,8 +54,17 @@ X_train_scaled = scaler.transform(X_train).astype(np.float32)
 # ============================================================
 
 def quantize(values):
+    """
+    Symmetric per-tensor INT8 quantization.
 
-    scale = np.max(np.abs(values)) / 127.0
+    DEFECT FIX: guard against an all-zero tensor. Previously this divided by
+    zero when max(|values|) == 0, silently producing NaN scales and a header
+    full of garbage. quantization_test.py already had this guard; the exporter
+    that actually writes the shipped header did not.
+    """
+    maximum = np.max(np.abs(values))
+
+    scale = maximum / 127.0 if maximum > 0 else 1.0
 
     q_values = np.clip(
         np.rint(values / scale),
@@ -121,7 +139,7 @@ q_b2 = np.rint(
 # 8. EXPORT MODEL PARAMETERS TO ARM C HEADER
 # ============================================================
 
-with open(OUTPUT_FILE, "w") as f:
+with open(OUTPUT_FILE, "w", newline="\n") as f:
 
     f.write("#ifndef MODEL_INT8_PARAMS_H\n")
     f.write("#define MODEL_INT8_PARAMS_H\n\n")
@@ -186,8 +204,8 @@ print("Output:", OUTPUT_FILE)
 print("\nMODEL INFORMATION")
 print("-----------------")
 
-print("Input features:", len(features))
-print("Hidden neurons:", MODEL_HIDDEN if False else 8)
+print("Input features:", INPUT_UNITS)
+print("Hidden neurons:", HIDDEN_UNITS)
 print("Output neurons:", 1)
 
 print("\nQUANTIZATION")

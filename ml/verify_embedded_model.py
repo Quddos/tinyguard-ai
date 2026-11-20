@@ -1,14 +1,48 @@
 
 import subprocess
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import joblib
 
-# Load dataset and trained model
-df = pd.read_csv("data/tinyguard_vibration_dataset.csv")
+from header_params import load_fp32_header
 
-model = joblib.load("models/tinyguard_mlp.pkl")
-scaler = joblib.load("models/tinyguard_scaler.pkl")
+BASE_DIR = Path(__file__).resolve().parent
+FIRMWARE_DIR = BASE_DIR.parent / "firmware"
+
+# Load dataset and trained model
+df = pd.read_csv(BASE_DIR / "data" / "tinyguard_vibration_dataset.csv")
+
+model = joblib.load(BASE_DIR / "models" / "tinyguard_mlp.pkl")
+scaler = joblib.load(BASE_DIR / "models" / "tinyguard_scaler.pkl")
+
+# GUARD (defect fix): assert the committed FP32 header matches the .pkl, so the
+# model being verified is provably the model being compiled into the firmware.
+fp32 = load_fp32_header()
+
+np.testing.assert_allclose(
+    fp32["weights1"], model.coefs_[0].astype(np.float32), rtol=0, atol=1e-6,
+    err_msg="weights1 in model_params.h does not match tinyguard_mlp.pkl",
+)
+np.testing.assert_allclose(
+    fp32["bias1"], model.intercepts_[0].astype(np.float32), rtol=0, atol=1e-6,
+    err_msg="bias1 in model_params.h does not match tinyguard_mlp.pkl",
+)
+np.testing.assert_allclose(
+    fp32["weights2"], model.coefs_[1].ravel().astype(np.float32), rtol=0, atol=1e-6,
+    err_msg="weights2 in model_params.h does not match tinyguard_mlp.pkl",
+)
+np.testing.assert_allclose(
+    fp32["scaler_mean"], scaler.mean_.astype(np.float32), rtol=0, atol=1e-4,
+    err_msg="scaler_mean in model_params.h does not match tinyguard_scaler.pkl",
+)
+np.testing.assert_allclose(
+    fp32["scaler_scale"], scaler.scale_.astype(np.float32), rtol=0, atol=1e-4,
+    err_msg="scaler_scale in model_params.h does not match tinyguard_scaler.pkl",
+)
+
+print("Header consistency: FP32 header matches the trained .pkl")
 
 features = ["mean_absolute", "rms", "peak"]
 
@@ -35,8 +69,19 @@ input_text = "".join(
     for a, b, c in X
 )
 
+binary = FIRMWARE_DIR / "verify_model_host"
+if not binary.exists():
+    binary = FIRMWARE_DIR / "verify_model_host.exe"
+
+if not binary.exists():
+    raise SystemExit(
+        "Host verification binary not found in "
+        + str(FIRMWARE_DIR)
+        + ". Build it first:  make -C firmware hosttools"
+    )
+
 result = subprocess.run(
-    ["../firmware/verify_model_host"],
+    [str(binary)],
     input=input_text,
     text=True,
     capture_output=True,

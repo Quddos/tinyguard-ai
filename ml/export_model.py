@@ -3,8 +3,10 @@ import joblib
 from pathlib import Path
 
 # Load trained model and scaler
-model = joblib.load("models/tinyguard_mlp.pkl")
-scaler = joblib.load("models/tinyguard_scaler.pkl")
+_BASE = Path(__file__).resolve().parent
+
+model = joblib.load(_BASE / "models" / "tinyguard_mlp.pkl")
+scaler = joblib.load(_BASE / "models" / "tinyguard_scaler.pkl")
 
 # Verify expected network architecture
 assert model.n_features_in_ == 3
@@ -57,11 +59,24 @@ static const float bias2 = {float(model.intercepts_[1][0]):.9g}f;
 #endif
 """
 
-output = Path("models/model_params.h")
-output.write_text(header)
+BASE_DIR = Path(__file__).resolve().parent
+
+# Write LF explicitly so the export is byte-deterministic on every platform and
+# the determinism test can compare the regenerated file against the committed
+# one directly.
+outputs = [
+    BASE_DIR / "models" / "model_params.h",
+    BASE_DIR.parent / "firmware" / "model_params.h",
+]
+
+for output in outputs:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with open(output, "w", newline="\n") as f:
+        f.write(header)
 
 print("Model parameters exported successfully.")
-print("Output:", output)
+for output in outputs:
+    print("Output:", output)
 print("Input features:", model.n_features_in_)
 print("Hidden neurons:", model.hidden_layer_sizes[0])
 print("Output classes:", model.classes_)

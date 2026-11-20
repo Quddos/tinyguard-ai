@@ -1,0 +1,266 @@
+{
+  "scheme": "symmetric per-tensor INT8, INT32 biases and accumulators",
+  "calibration": {
+    "partition": "training split only",
+    "n": 2400,
+    "note": "Test data is never used for calibration."
+  },
+  "header_file": "firmware/model_int8_params.h",
+  "header_sha256": "4ab34a80f68bfdbf7e14fd95031347144b2bd7dff24497a0e5be5561cb52971b",
+  "exporter_reproduces_committed_header": true,
+  "integer_tensors_bit_exact": true,
+  "scale_representation_equivalence": {
+    "max_scale_ulp_distance": 1,
+    "per_scale_ulp_distance": {
+      "INPUT_SCALE": 1,
+      "ACC1_SCALE": 1,
+      "HIDDEN_SCALE": 1,
+      "ACC2_SCALE": 1
+    },
+    "identical_quantized_inputs": true,
+    "identical_output_accumulators": true,
+    "identical_predictions": true,
+    "max_logit_difference": 1.52587890625e-05,
+    "min_abs_output_accumulator": 382,
+    "note": "A 1-ULP difference between the header text and the float64-cast scale is a decimal-representation artifact, not exporter drift. It is inert here: quantized inputs, accumulators and predictions are bit-identical across the whole dataset, and the smallest decision margin is far larger than the perturbation."
+  },
+  "scales": {
+    "input": 0.031143564730882645,
+    "layer1_weight": 0.016214951872825623,
+    "layer1_accumulator": 0.0005049914470873773,
+    "hidden_activation": 0.17779675126075745,
+    "layer2_weight": 0.036833446472883224,
+    "layer2_accumulator": 0.006548867095261812
+  },
+  "representable_normalized_input_range": {
+    "max_abs": 3.955232620239258,
+    "dataset_max_abs_normalized": 3.955232445640168,
+    "note": "Inputs beyond this range clip at +/-127. The dataset fits inside it; the SENSOR_ABNORMAL firmware demo window does not, which is why its INT8 logit is compressed."
+  },
+  "tensor_statistics": {
+    "normalized_inputs": {
+      "shape": [
+        2400,
+        3
+      ],
+      "min": -1.0480281687221469,
+      "max": 3.955232445640168,
+      "max_abs": 3.955232445640168,
+      "int8_scale": 0.03114356256409581,
+      "reconstruction_error_max": 0.015567288103924659,
+      "reconstruction_error_mean": 0.007260812407758779
+    },
+    "layer1_weights": {
+      "shape": [
+        3,
+        8
+      ],
+      "min": -2.0592989755200906,
+      "max": 1.9766041813740143,
+      "max_abs": 2.0592989755200906,
+      "int8_scale": 0.01621495256315032,
+      "reconstruction_error_max": 0.00681453673593202,
+      "reconstruction_error_mean": 0.0038093365742290467
+    },
+    "layer1_biases": {
+      "shape": [
+        8
+      ],
+      "min": -1.2184730612351458,
+      "max": 3.365342513788055,
+      "max_abs": 3.365342513788055,
+      "int8_scale": 0.026498759951087046,
+      "reconstruction_error_max": 0.01028025131474869,
+      "reconstruction_error_mean": 0.006137770407534677
+    },
+    "hidden_activations": {
+      "shape": [
+        2400,
+        8
+      ],
+      "min": 0.0,
+      "max": 22.538230180073544,
+      "max_abs": 22.538230180073544,
+      "int8_scale": 0.17746637937065782,
+      "reconstruction_error_max": 0.08859956867983049,
+      "reconstruction_error_mean": 0.016289576396618113
+    },
+    "layer2_weights": {
+      "shape": [
+        8,
+        1
+      ],
+      "min": -3.2751080480310732,
+      "max": 4.677847830471282,
+      "max_abs": 4.677847830471282,
+      "int8_scale": 0.03683344748402584,
+      "reconstruction_error_max": 0.01767182892758279,
+      "reconstruction_error_mean": 0.008640987606858764
+    },
+    "layer2_biases": {
+      "shape": [
+        1
+      ],
+      "min": -0.07218721265528355,
+      "max": -0.07218721265528355,
+      "max_abs": 0.07218721265528355,
+      "int8_scale": 0.0005684032492542011,
+      "reconstruction_error_max": 0.0,
+      "reconstruction_error_mean": 0.0
+    }
+  },
+  "fidelity_naive_split_test": {
+    "n": 600,
+    "fp32_accuracy": 1.0,
+    "int8_accuracy": 1.0,
+    "prediction_mismatches": 0,
+    "prediction_agreement": 1.0,
+    "logit_abs_error_max": 1.1166867662577786,
+    "logit_abs_error_mean": 0.24619163454488918,
+    "logit_abs_error_p95": 0.5940994107546196,
+    "windows_with_saturated_input": 0,
+    "fraction_saturated": 0.0
+  },
+  "fidelity_whole_dataset": {
+    "n": 3000,
+    "fp32_accuracy": 1.0,
+    "int8_accuracy": 1.0,
+    "prediction_mismatches": 0,
+    "prediction_agreement": 1.0,
+    "logit_abs_error_max": 1.263436934503689,
+    "logit_abs_error_mean": 0.25078938548500174,
+    "logit_abs_error_p95": 0.5993505618787458,
+    "windows_with_saturated_input": 1,
+    "fraction_saturated": 0.0003333333333333333
+  },
+  "firmware_demo_windows": {
+    "SENSOR_NORMAL": {
+      "window": [
+        12,
+        -10,
+        15,
+        -13,
+        8,
+        -14,
+        11,
+        -9,
+        16,
+        -12,
+        10,
+        -11,
+        14,
+        -8,
+        9,
+        -13
+      ],
+      "features": {
+        "mean_absolute": 11,
+        "rms": 11,
+        "peak": 16
+      },
+      "expected_label": 0,
+      "within_training_range_for_its_class": true,
+      "int8_quantized_input": [
+        -13,
+        -19,
+        -25
+      ],
+      "input_saturated": false,
+      "fp32_logit": -12.854340187084812,
+      "int8_logit": -13.425177574157715,
+      "logit_abs_error": 0.5708373870729027,
+      "fp32_prediction": 0,
+      "int8_prediction": 0,
+      "predictions_agree": true
+    },
+    "SENSOR_ABNORMAL_TYPICAL": {
+      "window": [
+        -12,
+        39,
+        39,
+        -11,
+        -57,
+        -14,
+        29,
+        46,
+        -11,
+        -47,
+        -39,
+        13,
+        74,
+        10,
+        -25,
+        -28
+      ],
+      "features": {
+        "mean_absolute": 30,
+        "rms": 35,
+        "peak": 74
+      },
+      "expected_label": 1,
+      "within_training_range_for_its_class": true,
+      "int8_quantized_input": [
+        27,
+        23,
+        25
+      ],
+      "input_saturated": false,
+      "fp32_logit": 43.58277884792663,
+      "int8_logit": 43.24216842651367,
+      "logit_abs_error": 0.3406104214129613,
+      "fp32_prediction": 1,
+      "int8_prediction": 1,
+      "predictions_agree": true
+    },
+    "SENSOR_ABNORMAL": {
+      "window": [
+        120,
+        -110,
+        145,
+        -130,
+        180,
+        -160,
+        135,
+        -190,
+        170,
+        -140,
+        155,
+        -175,
+        190,
+        -120,
+        165,
+        -185
+      ],
+      "features": {
+        "mean_absolute": 154,
+        "rms": 156,
+        "peak": 190
+      },
+      "expected_label": 1,
+      "within_training_range_for_its_class": false,
+      "int8_quantized_input": [
+        127,
+        127,
+        125
+      ],
+      "input_saturated": true,
+      "fp32_logit": 236.5388209849103,
+      "int8_logit": 128.32505798339844,
+      "logit_abs_error": 108.21376300151186,
+      "fp32_prediction": 1,
+      "int8_prediction": 1,
+      "predictions_agree": true
+    }
+  },
+  "parameter_footprint_bytes": {
+    "fp32_total": 188,
+    "int8_total": 92,
+    "fp32_weights_only": 128,
+    "int8_weights_only": 32,
+    "int8_biases_only": 36,
+    "scaler_float32": 24,
+    "reduction_ratio_weights_only": 4.0,
+    "reduction_ratio_total": 2.0434782608695654,
+    "note": "Biases are INT32 and the StandardScaler stays float32, so the total footprint does not shrink 4x. Only the weight tensors do. Both ratios are reported so the weight-only figure is not mistaken for the whole-model saving."
+  }
+}

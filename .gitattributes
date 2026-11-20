@@ -1,2 +1,25 @@
-# Auto detect text files and perform LF normalization
+# Normalize line endings for text files on commit.
 * text=auto
+
+# Explicitly mark research binaries so they are never line-ending mangled.
+# Git's binary heuristic normally catches these, but relying on a heuristic to
+# protect the committed model is not acceptable for a reproducibility artifact.
+*.pkl binary
+*.joblib binary
+*.npy binary
+*.npz binary
+*.elf binary
+*.bin binary
+*.png binary
+
+# Generated C headers are checked out with LF on every platform, and the export
+# scripts write LF explicitly, so `export_*.py` is byte-deterministic and the
+# determinism test can compare against the committed file directly.
+firmware/model_params.h     text eol=lf
+firmware/model_int8_params.h text eol=lf
+ml/models/model_params.h    text eol=lf
+
+# Metrics artifacts and the dataset stay LF so regeneration is byte-stable on
+# disk (not merely after git's EOL normalisation) and hashes are portable.
+results/*.json text eol=lf
+ml/data/*.csv text eol=lf

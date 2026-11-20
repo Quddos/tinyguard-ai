@@ -1,3 +1,20 @@
+"""
+TinyGuard-AI synthetic vibration dataset generator.
+
+SCIENTIFIC LIMITATION
+---------------------
+This dataset is entirely SYNTHETIC. No physical accelerometer, machine or
+sensor was involved at any point. Signals are produced by the analytic models
+below. Any result derived from this dataset describes behaviour on synthetic
+data only and must never be presented as physical sensor validation.
+
+The two classes are drawn from near-disjoint amplitude regimes, so the
+classification task is separable almost by construction. See README.md
+("Interpreting the accuracy figures") before quoting any accuracy number.
+
+Determinism: a single seeded Generator (seed 42) supplies every random draw,
+and draws happen in a fixed order, so this script is byte-reproducible.
+"""
 
 import numpy as np
 import pandas as pd
@@ -10,7 +27,15 @@ rng = np.random.default_rng(42)
 SAMPLES_PER_WINDOW = 16
 WINDOWS_PER_CLASS = 1500
 
+ABNORMAL_SCENARIOS = [
+    "high_amplitude",
+    "impulsive",
+    "mixed_frequency",
+]
+
+
 def generate_healthy():
+    """Low-amplitude sinusoid plus mild Gaussian noise."""
     amplitude = rng.uniform(5, 18)
     frequency = rng.uniform(0.5, 2.5)
     phase = rng.uniform(0, 2 * np.pi)
@@ -25,14 +50,15 @@ def generate_healthy():
     return np.rint(signal).astype(np.int32)
 
 
-def generate_abnormal():
-    t = np.arange(SAMPLES_PER_WINDOW)
+def generate_abnormal(scenario):
+    """
+    Fault signal for one of ABNORMAL_SCENARIOS.
 
-    scenario = rng.choice([
-        "high_amplitude",
-        "impulsive",
-        "mixed_frequency"
-    ])
+    The scenario is chosen by the caller so that the random draw which selects
+    it stays in the main loop. This keeps the draw order identical to the
+    original implementation and therefore keeps the dataset byte-reproducible.
+    """
+    t = np.arange(SAMPLES_PER_WINDOW)
 
     if scenario == "high_amplitude":
 
@@ -46,24 +72,20 @@ def generate_abnormal():
 
     elif scenario == "impulsive":
 
-        signal = (
-            rng.normal(0, 8, SAMPLES_PER_WINDOW)
-        )
-
-        number_of_impulses = rng.integers(1, 4)
+        signal = rng.normal(0, 8, SAMPLES_PER_WINDOW)
 
         positions = rng.choice(
             SAMPLES_PER_WINDOW,
-            size=number_of_impulses,
+            size=rng.integers(1, 4),
             replace=False
         )
 
         signal[positions] += rng.choice(
             [-1, 1],
-            size=number_of_impulses
-        ) * rng.uniform(50, 130, number_of_impulses)
+            size=len(positions)
+        ) * rng.uniform(50, 130, len(positions))
 
-    else:
+    elif scenario == "mixed_frequency":
 
         signal = (
             25 * np.sin(2 * np.pi * t / 16)
@@ -71,11 +93,20 @@ def generate_abnormal():
             + rng.normal(0, 8, SAMPLES_PER_WINDOW)
         )
 
+    else:
+        raise ValueError(f"Unknown abnormal scenario: {scenario!r}")
+
     return np.rint(signal).astype(np.int32)
 
 
 def extract_features(samples):
+    """
+    Integer feature extraction.
 
+    Deliberately mirrors firmware/signal_features.c exactly: truncating
+    integer division and integer square root, so the Python features and the
+    on-target C features are identical for the same window.
+    """
     absolute = np.abs(samples.astype(np.int64))
 
     mean_absolute = int(np.sum(absolute) // len(samples))
@@ -101,52 +132,8 @@ for label in [0, 1]:
             samples = generate_healthy()
             scenario = "healthy"
         else:
-            scenario = rng.choice([
-                "high_amplitude",
-                "impulsive",
-                "mixed_frequency"
-            ])
-
-            # Generate according to selected scenario
-            if scenario == "high_amplitude":
-                t = np.arange(SAMPLES_PER_WINDOW)
-                amplitude = rng.uniform(30, 120)
-                frequency = rng.uniform(1, 4)
-
-                signal = (
-                    amplitude * np.sin(
-                        2 * np.pi * frequency * t / 16
-                    )
-                    + rng.normal(0, 8, SAMPLES_PER_WINDOW)
-                )
-
-            elif scenario == "impulsive":
-                signal = rng.normal(
-                    0, 8, SAMPLES_PER_WINDOW
-                )
-
-                positions = rng.choice(
-                    SAMPLES_PER_WINDOW,
-                    size=rng.integers(1, 4),
-                    replace=False
-                )
-
-                signal[positions] += rng.choice(
-                    [-1, 1], size=len(positions)
-                ) * rng.uniform(
-                    50, 130, len(positions)
-                )
-
-            else:
-                t = np.arange(SAMPLES_PER_WINDOW)
-
-                signal = (
-                    25 * np.sin(2 * np.pi * t / 16)
-                    + 20 * np.sin(2 * np.pi * 4 * t / 16)
-                    + rng.normal(0, 8, SAMPLES_PER_WINDOW)
-                )
-
-            samples = np.rint(signal).astype(np.int32)
+            scenario = rng.choice(ABNORMAL_SCENARIOS)
+            samples = generate_abnormal(scenario)
 
         mean_abs, rms, peak = extract_features(samples)
 
@@ -173,7 +160,7 @@ df = df.sample(
     random_state=42
 ).reset_index(drop=True)
 
-output = Path("data")
+output = Path(__file__).resolve().parent / "data"
 output.mkdir(exist_ok=True)
 
 df.to_csv(
@@ -183,6 +170,7 @@ df.to_csv(
 
 print("\nTinyGuard-AI Dataset Generation Complete")
 print("-----------------------------------------")
+print("NOTE: synthetic data only - no physical sensor was used.")
 print("Total windows:", len(df))
 print("\nClass distribution:")
 print(df["label"].value_counts())
@@ -199,4 +187,4 @@ print(df[[
 ]].head(10))
 
 print("\nSaved to:")
-print("data/tinyguard_vibration_dataset.csv")
+print(output / "tinyguard_vibration_dataset.csv")

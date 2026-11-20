@@ -1,0 +1,51 @@
+# ---- Firmware build output ----
+firmware/build/
+*.elf
+*.map
+*.bin
+*.hex
+*.o
+*.obj
+*.su
+*.lst
+
+# MSVC intermediates (host verification tools built with cl.exe)
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# ---- Host verification binaries (built via `make hosttools`) ----
+firmware/verify_int8_host
+firmware/verify_model_host
+firmware/test_model_host
+firmware/debug_int8_host
+firmware/*.exe
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+
+# ---- Editor / tooling ----
+# .claude/launch.json is kept (it defines the dashboard dev server);
+# anything else Claude Code writes there is local state.
+.claude/*
+!.claude/launch.json
+
+# ---- OS / editor noise ----
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# NOTE: ml/data/, ml/models/ and results/ are deliberately TRACKED.
+# They are research assets required for reproducibility.
