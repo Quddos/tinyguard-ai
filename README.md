@@ -33,7 +33,10 @@ The defensible contributions are **not** the classification score:
 
 1. **A complete FP32 → INT8 quantization pipeline** for a 3→8→1 MLP: symmetric
    per-tensor weight quantization, INT32 biases, INT32 accumulators, and
-   activation rescaling calibrated on the training split only.
+   activation rescaling calibrated on the training split only. The
+   multiply-accumulate and the class decision are integer; the normalization
+   and rescaling steps remain float32 — see
+   [What is and is not integer arithmetic](#what-is-and-is-not-integer-arithmetic).
 2. **Bit-exact equivalence between the Python reference and the C engine.**
    `ml/verify_int8_c.py` reproduces C's `float32` arithmetic and
    round-away-from-zero semantics, then compares against the compiled binary
@@ -381,6 +384,55 @@ window using **truncating integer arithmetic and an integer square root**, so
 | `ACC2_SCALE` | 0.00654886705577 |
 
 Calibration uses the **training split only** — test data never informs a scale.
+
+### What is and is not integer arithmetic
+
+Quantization here reduces **weight storage** and keeps the multiply-accumulate
+in integers. It does **not** make inference floating-point-free:
+
+| Stage | Arithmetic |
+|---|---|
+| Feature extraction (`signal_features.c`) | **integer only** — truncating division, integer square root, 64-bit accumulators |
+| Input normalization `(x − mean) / std` | float32 |
+| Input quantization `z / INPUT_SCALE` | float32, then cast to INT8 |
+| Layer 1 and layer 2 MAC | **INT8 × INT8 → INT32** |
+| Hidden requantization `acc1 × ACC1_SCALE / HIDDEN_SCALE` | float32, then cast to INT8 |
+| Class decision | **INT32 comparison** (`accumulator ≥ 0`) |
+| Reported logit `acc2 × ACC2_SCALE` | float32 (display only) |
+
+The class decision is taken on the integer accumulator, so the float scales
+never change the predicted class. But the deployed path still requires
+floating-point support, and this build targets `-mcpu=cortex-m4` **without**
+`-mfpu`, so those operations are executed by libgcc **soft-float** routines —
+the image contains no VFP instructions.
+
+### Firmware footprint
+
+Measured from `make -C firmware size` and `-fstack-usage` on the committed
+sources (QEMU target `mps2-an386`):
+
+| | Bytes | Of available |
+|---|---|---|
+| `.text` (flash) | 4,964 | 1.9 % of 256 K |
+| `.data` | 0 | — |
+| `.bss` | 0 | — |
+| **Static RAM (`.data` + `.bss`)** | **0** | — |
+| **Peak stack** | **≈ 240** | 0.37 % of 64 K |
+
+> **The firmware does not use "zero RAM."** It allocates no *static* RAM — the
+> linker map shows `_sdata = _edata = _sbss = _ebss` — but the call path
+> `Reset_Handler → main → monitor_motor → tinyguard_int8_predict`
+> (8 + 16 + 120 + 96 bytes) uses roughly **240 bytes of stack**. Quote the
+> static figure and the stack figure separately.
+
+Roughly **2.9 KB of the 4,964-byte image is compiler support**, not project
+code: libgcc soft-float routines (`__aeabi_fadd`, `__aeabi_fmul`,
+`__aeabi_fdiv`, …) plus `__udivmoddi4`, the 64-bit division helper pulled in by
+the overflow-safe feature accumulators. Project code — inference, features,
+startup and the semihosting demo — is roughly 2 KB. An FPU-equipped target
+built with `-mfpu=fpv4-sp-d16 -mfloat-abi=hard` would remove most of the
+soft-float portion; that build is not part of this release and has not been
+measured.
 
 ### Known limitation: input quantizer saturation
 

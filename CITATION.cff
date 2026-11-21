@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as follows."
+title: "TinyGuard-AI: An ARM Cortex-M4-Based TinyML Predictive Maintenance and Intelligent Sensor Monitoring System"
+abstract: >-
+  TinyGuard-AI is a reproducible end-to-end pipeline that trains a small
+  multilayer perceptron on vibration features, quantizes it to INT8, exports the
+  parameters as C headers, and runs the model as bare-metal firmware on an ARM
+  Cortex-M4. The integer inference engine is verified against the Python
+  reference implementation with zero prediction divergence across all 3000
+  windows, and the dataset and generated headers regenerate byte-for-byte from
+  the committed sources. Scientific limitations are intrinsic to this release:
+  the vibration dataset is synthetic, and ARM execution is QEMU emulation. No
+  physical accelerometer, machine or microcontroller was measured, and no
+  inference latency or energy figure is reported. The reported classification
+  accuracy reflects the separability of the synthetic generator rather than
+  demonstrated model capability, and simpler baselines reach the same score.
+type: software
+version: 1.0.0
+date-released: 2026-11-21
+license: MIT
+repository-code: "https://github.com/Quddos/tinyguard-ai"
+url: "https://github.com/Quddos/tinyguard-ai"
+authors:
+  - given-names: Qudus
+    family-names: Raheem
+    orcid: "https://orcid.org/0009-0001-4526-4814"
+keywords:
+  - TinyML
+  - embedded machine learning
+  - ARM Cortex-M4
+  - INT8 quantization
+  - post-training quantization
+  - predictive maintenance
+  - vibration analysis
+  - bare-metal firmware
+  - QEMU emulation
+  - reproducible research
