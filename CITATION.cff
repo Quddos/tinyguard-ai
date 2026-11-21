@@ -18,6 +18,14 @@ type: software
 version: 1.0.0
 date-released: 2026-11-21
 license: MIT
+doi: 10.5281/zenodo.24414674
+identifiers:
+  - description: "Version-specific DOI for TinyGuard-AI v1.0.0"
+    type: doi
+    value: 10.5281/zenodo.24414674
+  - description: "Concept DOI representing all versions of TinyGuard-AI"
+    type: doi
+    value: 10.5281/zenodo.24414673
 repository-code: "https://github.com/Quddos/tinyguard-ai"
 url: "https://github.com/Quddos/tinyguard-ai"
 authors:
