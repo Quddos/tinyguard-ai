@@ -1,5 +1,8 @@
 # TinyGuard-AI
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24414674.svg)](https://doi.org/10.5281/zenodo.24414674)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **An ARM Cortex-M4-Based TinyML Predictive Maintenance and Intelligent Sensor Monitoring System**
 
 A complete, reproducible pipeline that trains a small neural network on vibration
@@ -486,6 +489,45 @@ which alone determine the class — match bit-exactly. Verified in
 ```powershell
 python -m pytest
 ```
+
+---
+
+## Citation
+
+This release is archived on Zenodo with a permanent DOI:
+
+**[10.5281/zenodo.24414674](https://doi.org/10.5281/zenodo.24414674)**
+
+If you use this software in your work, please cite it as:
+
+> Raheem, Q. (2026). *TinyGuard-AI: An ARM Cortex-M4-Based TinyML Predictive
+> Maintenance and Intelligent Sensor Monitoring System* (Version 1.0.0).
+> Zenodo. https://doi.org/10.5281/zenodo.24414674
+
+### BibTeX
+
+```bibtex
+@software{raheem_2026_tinyguard_ai,
+  author    = {Raheem, Qudus},
+  title     = {TinyGuard-AI: An ARM Cortex-M4-Based TinyML Predictive
+               Maintenance and Intelligent Sensor Monitoring System},
+  version   = {1.0.0},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.24414674},
+  url       = {https://doi.org/10.5281/zenodo.24414674}
+}
+```
+
+Machine-readable citation metadata is in [`CITATION.cff`](CITATION.cff), which
+GitHub renders through the *Cite this repository* button in the sidebar.
+
+> **When citing results from this work**, please carry the constraints with
+> them: the vibration dataset is **synthetic**, ARM execution is **QEMU
+> emulation**, and the reported accuracy reflects the separability of the
+> synthetic generator rather than demonstrated model capability. See
+> [Scientific limitations](#️-scientific-limitations--read-first) and
+> [Interpreting the accuracy figures](#interpreting-the-accuracy-figures).
 
 ---
 
